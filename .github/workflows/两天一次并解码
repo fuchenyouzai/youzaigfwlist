@@ -1,0 +1,30 @@
+name: gfwlist Update
+on:
+  push:
+  schedule:
+    # 每2天的8点整执行一次
+    - cron: '0 8 */2 * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Update gfwlist Files
+      run: |
+        # 1. 下载原始Base64格式的gfwlist
+        rm -f gfwlist_base64 && wget https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt -O gfwlist_base64
+        # 2. 对下载文件进行Base64解码，输出为最终的gfwlist文件
+        base64 -d gfwlist_base64 > gfwlist
+        # 3. 删除临时的Base64原始文件（可选，保持目录整洁）
+        rm -f gfwlist_base64
+        
+        git config --local user.name "github-actions[bot]"
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git pull origin main
+        git add gfwlist
+        git commit -m "gfwlist Update (Base64 decoded)."  # 备注中添加解码说明，便于追溯
+    - name: Push changes
+      run: git push origin main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
