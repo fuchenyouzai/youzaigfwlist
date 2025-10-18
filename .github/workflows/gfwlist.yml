@@ -1,28 +1,30 @@
-# 删除旧的明文文件，避免残留旧内容
-rm -f youzaigfwlist
+name: gfwlist Update
+on:
+  push:
+  schedule:
+    - cron: '15 16,18,20,22,0,2,4,6,8,10,12,14 * * *'
 
-# 下载编码文件并通过管道直接解码，生成明文文件（不保留原始编码文件）
-wget -qO- https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt | base64 -d > youzaigfwlist
-
-# 配置 Git 提交身份（仅本地生效）
-git config --local user.name "github-actions[bot]"
-git config --local user.email "github-actions[bot]@users.noreply.github.com"
-
-# 拉取远程最新代码，防止提交冲突
-git pull origin main
-
-# 仅添加目标明文文件到 Git 暂存区
-git add youzaigfwlist
-
-# 关键修复：检测文件是否有变更，有则提交，无则跳过
-if git diff --quiet --exit-code youzaigfwlist; then
-  # 无变更时输出提示，不执行提交
-  echo "✅ youzaigfwlist 与远程版本一致，无更新内容，无需提交"
-else
-  # 有变更时执行提交
-  git commit -m "gfwlist 更新：Base64 解码为明文（文件：youzaigfwlist）"
-  # 若需自动推送到远程，可取消下方注释（根据实际权限配置）
-  # git push origin main
-fi
-
-shell：/usr/bin/bash -e {0}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Update gfwlist (Base64 Decode to Plaintext)
+      run: |
+        # 删除旧的明文文件，避免残留旧内容
+        rm -f youzaigfwlist
+        # 下载编码文件并解码，强制更新本地文件（即使内容无变化）
+        wget -qO- https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt | base64 -d > youzaigfwlist
+        # 配置 Git 提交身份
+        git config --local user.name "github-actions[bot]"
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        # 拉取远程最新代码，防止冲突
+        git pull origin main
+        # 强制添加文件（确保文件状态被 Git 追踪）
+        git add youzaigfwlist
+        # 关键修改：--allow-empty 允许无内容变更时也提交，备注中增加时间戳更清晰
+        git commit --allow-empty -m "gfwlist Update: Sync latest (Base64 decoded, file: youzaigfwlist) | Timestamp: $(date +'%Y-%m-%d %H:%M:%S')"
+    - name: Push to main branch
+      run: git push origin main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
