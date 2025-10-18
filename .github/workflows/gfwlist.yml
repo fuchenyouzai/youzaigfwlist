@@ -9,16 +9,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Update gfwlist Files
+    - name: Update gfwlist (Base64 Decode to Plaintext)
       run: |
-        rm -f youzaigfwlist && wget https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt -O youzaigfwlist
+        # 删除旧的明文文件，避免残留旧内容
+        rm -f youzaigfwlist
+        # 下载编码文件并通过管道直接解码，生成名为 youzaigfwlist 的明文文件（不保留原始编码文件）
+        wget -qO- https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt | base64 -d > youzaigfwlist
+        # 配置 Git 提交身份
         git config --local user.name "github-actions[bot]"
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        git pull origin main  # 新增这行，拉取远程最新代码
+        # 拉取远程最新代码，防止提交冲突
+        git pull origin main
+        # 仅添加明文文件 youzaigfwlist 到 Git
         git add youzaigfwlist
-        git commit -m "gfwlist Update."
-    - name: Push changes
+        # 提交更新，说明文件类型
+        git commit -m "gfwlist Update: Base64 decoded to plaintext (file: youzaigfwlist)"
+    - name: Push plaintext file to main branch
       run: git push origin main
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
