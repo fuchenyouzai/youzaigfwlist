@@ -1,8 +1,9 @@
+
 name: gfwlist Update
 on:
   push:
   schedule:
-    - cron: '15 16,18,20,22,0,2,4,6,8,10,12,14 * * *'
+    - cron: '8 * * *'
 
 jobs:
   build:
@@ -11,27 +12,24 @@ jobs:
     - uses: actions/checkout@v3
     - name: Update gfwlist (Base64 Decode to Plaintext)
       run: |
-        # 核心步骤1：强制删除旧的明文文件（-f 确保即使文件不存在也不报错）
-        echo "🔍 正在删除旧的 youzaigfwlist 文件..."
+        # 删除旧的明文文件，避免残留旧内容
         rm -f youzaigfwlist
-        
-        # 核心步骤2：删除后重新下载并解码，生成全新文件
-        echo "📥 正在下载最新 gfwlist 并解码..."
+        # 下载编码文件并通过管道直接解码，生成名为 youzaigfwlist 的明文文件（不保留原始编码文件）
         wget -qO- https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt | base64 -d > youzaigfwlist
-        
         # 配置 Git 提交身份
         git config --local user.name "github-actions[bot]"
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        
         # 拉取远程最新代码，防止提交冲突
         git pull origin main
-        
-        # 仅添加新生成的明文文件到 Git
+        # 仅添加明文文件 youzaigfwlist 到 Git
         git add youzaigfwlist
-        
-        # 允许空提交（避免无内容更新时流程失败），并添加操作日志
-        git commit --allow-empty -m "gfwlist Update: Delete old file first, then sync latest (file: youzaigfwlist) | Timestamp: $(date +'%Y-%m-%d %H:%M:%S')"
+        # 提交更新，说明文件类型
+        git commit -m "gfwlist Update: Base64 decoded to plaintext (file: youzaigfwlist)"
     - name: Push plaintext file to main branch
       run: git push origin main
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+
+
