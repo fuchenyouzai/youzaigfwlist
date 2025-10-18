@@ -15,7 +15,7 @@ jobs:
         git config --local user.name "github-actions[bot]"
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git pull origin main  # 新增这行，拉取远程最新代码
-        git add e.xml
+        git add youzaigfwlist
         git commit -m "gfwlist Update."
     - name: Push changes
       run: git push origin main
