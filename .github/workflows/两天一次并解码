@@ -4,7 +4,7 @@ on:
   push:
   schedule:
     # 每2天北京时间上午8点15分执行（UTC时间0点15分）
-    - cron: '45 0 */2 * *'
+    - cron: '50 0 */1 * *'
 
 jobs:
   build:
