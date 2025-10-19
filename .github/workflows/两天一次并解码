@@ -1,9 +1,10 @@
+
 name: gfwlist Update
 on:
   push:
   schedule:
     # 每2天北京时间上午8点15分执行（UTC时间0点15分）
-    - cron: '15 0 */2 * *'
+    - cron: '45 0 */2 * *'
 
 jobs:
   build:
@@ -28,3 +29,17 @@ jobs:
       run: git push origin main
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # 新增：发送Telegram通知
+    - name: Send Telegram Notification
+      run: |
+        # 替换为你的Telegram Bot Token和接收消息的Chat ID
+        TELEGRAM_BOT_TOKEN="8430958771:AAG4bkt9cR5_ZTXgeM3MeH7oSODpMjM6wJs"
+        TELEGRAM_CHAT_ID="1181205675"
+        # 通知内容（可自定义）
+        MESSAGE="✅ gfwlist已成功更新！\n更新时间：$(date '+%Y-%m-%d %H:%M:%S UTC')\n备注：已完成Base64解码"
+        # 调用Telegram Bot API发送消息
+        curl -s "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+          -d "chat_id=$TELEGRAM_CHAT_ID" \
+          -d "text=$MESSAGE" \
+          -d "parse_mode=Markdown"
+
