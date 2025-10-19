@@ -2,8 +2,8 @@ name: gfwlist Update
 on:
   push:
   schedule:
-    # 每2天的8点整执行一次
-    - cron: '0 8 */2 * *'
+    # 每2天的8点15分执行一次（已将8改为8.15）
+    - cron: '15 8 */2 * *'
 
 jobs:
   build:
