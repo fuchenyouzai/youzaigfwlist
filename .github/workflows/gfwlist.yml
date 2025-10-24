@@ -1,34 +1,35 @@
-name: gfwlist Update
+name: GFWList Update (Auto Decode)
 on:
   push:
   schedule:
-    - cron: '15 16,18,20,22,0,2,4,6,8,10,12,14 * * *'
+    # 每两天的北京时间16:15执行（分 时 * * *，*/2 代表间隔2天）
+    - cron: '15 16 */2 * *'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Update gfwlist (Base64 Decode to Plaintext)
+    - name: Update & Decode GFWList
       run: |
-        # 1. 第一步：优先删除本地旧文件（彻底清空历史残留）
-        echo "🔧 第一步：强制删除本地旧的 youzaigfwlist 文件"
-        rm -f youzaigfwlist
+        # 1. 删除旧文件（含编码版和解码版）
+        rm -f gfwlist.txt gfwlist_plain.txt
         
-        # 2. 第二步：拉取远程最新代码（此时本地已无旧文件，避免远程旧文件覆盖）
-        echo "🔄 第二步：拉取远程 main 分支最新代码"
+        # 2. 下载原始base64编码的gfwlist.txt
+        wget https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt -O gfwlist.txt
+        
+        # 3. 用base64命令解码，生成明文文件（-d 表示解码，-i 忽略非base64字符）
+        base64 -d -i gfwlist.txt > gfwlist_plain.txt
+        
+        # 4. 配置Git身份并拉取远程最新代码
         git config --local user.name "github-actions[bot]"
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git pull origin main
         
-        # 3. 第三步：下载并解码全新文件（此时本地无旧文件干扰，确保是最新内容）
-        echo "📥 第三步：下载最新 gfwlist 并解码生成新文件"
-        wget -qO- --timeout=10 https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt | base64 -d > youzaigfwlist
-        
-        # 4. 提交与推送（允许空提交，避免内容一致时报错）
-        git add youzaigfwlist
-        git commit --allow-empty -m "gfwlist Update: Delete old file first, then sync latest (file: youzaigfwlist) | Time: $(date +'%Y-%m-%d %H:%M:%S')"
-    - name: Push to main branch
+        # 5. 同时提交编码文件和解码后的明文文件
+        git add gfwlist.txt gfwlist_plain.txt
+        git commit -m "Update GFWList (base64 + plain text)"
+    - name: Push changes
       run: git push origin main
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
