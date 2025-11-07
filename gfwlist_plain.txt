@@ -1,9 +1,9 @@
 [AutoProxy 0.2.9]
-! Checksum: aD9GHLg+csFR5Xy602h+Ng
+! Checksum: ZLMUKeUGsFt3BVsSlxGjOA
 ! Expires: 6h
 ! Title: GFWList4LL
 ! GFWList with EVERYTHING included
-! Last Modified: Sat, 01 Nov 2025 03:13:17 +0000
+! Last Modified: Fri, 07 Nov 2025 08:22:11 +0000
 !
 ! HomePage: https://github.com/gfwlist/gfwlist
 ! License: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
@@ -2968,6 +2968,7 @@ eyevio.jp
 .ezpeer.com
 
 !--------------------FF-------------------------
+||flexclip.com
 ||freegpt.tech
 ||freegpt.es
 ||feedly.com
@@ -5238,6 +5239,7 @@ oyghan.com/wps
 .ozyoyo.com
 
 !--------------------PP-------------------------
+||images.prismic.io
 ||api.palworldgame.com
 ||pewresearch.org
 ||privacyguides.org
